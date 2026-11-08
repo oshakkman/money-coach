@@ -38,3 +38,4 @@ npm run check:secrets
 Project layout: `src/lib` (pure logic: `finance.ts`, `rafiq/`, `backup.ts`, `db.ts`), `src/pages`, `src/components`, `api/rafiq.ts` (serverless Claude endpoint), `tests/`.
 
 Rafiq is a decision-support tool, not regulated financial advice.
+# rafiq

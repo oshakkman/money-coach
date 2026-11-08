@@ -1,0 +1,29 @@
+# Dependencies and builds
+node_modules/
+dist/
+dev-dist/
+*.tsbuildinfo
+.vercel/
+
+# Secrets - NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Personal financial data - NEVER commit these
+*.rafiq
+*.rafiq.json
+rafiq-backup*
+backups/
+exports/
+
+# Test artefacts
+test-results/
+playwright-report/
+screenshots/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

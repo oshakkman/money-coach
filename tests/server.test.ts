@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { handleRafiqRequest } from '../server/rafiqHandler';
+import { handleRafiqRequest } from '../api/rafiq';
 
 const env = { ANTHROPIC_API_KEY: 'sk-ant-test', RAFIQ_ACCESS_CODE: 'my-private-code-123' };
 const post = (headers: Record<string, string>, body: unknown = { message: 'hi', snapshot: {}, engineAnalysis: {} }) =>

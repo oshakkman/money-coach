@@ -139,6 +139,10 @@ export interface ChatMessage {
   engine?: 'offline' | 'claude';
   /** Figures in an AI answer that could not be matched to your records. */
   unverified?: string[];
+  /** Why Claude was not used for this answer (shown to the user). */
+  aiNote?: string;
+  /** True once the user turned this answer's steps into tracked actions. */
+  committed?: boolean;
   createdAt: string;
 }
 

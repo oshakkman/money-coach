@@ -1,6 +1,6 @@
 // Deterministic financial calculations. Pure functions only: no storage, no
 // network, no AI. Every number Rafiq shows (online or offline) comes from here.
-import { add, round, sub, sum, toMinor } from './money';
+import { add, allowance, round, sub, sum, toMinor } from './money';
 import {
   addDays,
   addMonthsClamped,
@@ -216,7 +216,7 @@ export function safeToSpend(data: DataSet, today: ISODate): SafeToSpend {
   const buffer = data.settings.buffer || 0;
   const safe = round(spendable - commitmentsTotal - savingsReserve - buffer);
   const days = Math.max(1, payday.daysLeft);
-  const perDay = safe > 0 ? round(Math.floor((safe / days) * 1000) / 1000) : 0;
+  const perDay = allowance(safe, days);
   const spentThisPeriod = sum(
     data.transactions
       .filter((t) => t.date >= payday.periodStart && t.date <= today && isDiscretionarySpend(t, data))

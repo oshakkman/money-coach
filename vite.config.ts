@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 /**
- * Serves the same /api/rafiq handler used in production (api/rafiq.ts) while
+ * Serves the same /api/rafiq handler used in production (api/rafiq.ts, deployed on Vercel) while
  * running locally with `npm run dev` or `npm start`. The API key is read from
  * .env.local on YOUR computer and never reaches the browser bundle.
  */
@@ -12,7 +12,7 @@ function rafiqApi(env: Record<string, string>): Plugin {
   const middleware = async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     if (!req.url?.startsWith('/api/rafiq')) return next();
     try {
-      const { handleRafiqRequest } = await import('./server/rafiqHandler');
+      const { handleRafiqRequest } = await import('./api/rafiq');
       const chunks: Buffer[] = [];
       for await (const chunk of req) chunks.push(chunk as Buffer);
       const request = new Request(`http://localhost${req.url}`, {

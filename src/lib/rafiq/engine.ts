@@ -16,7 +16,7 @@ import {
   simulateDebts,
   upcomingCommitments,
 } from '../finance';
-import { formatMoney, round, sum } from '../money';
+import { allowance, formatMoney, round, sum } from '../money';
 import type { DataSet, ISODate, RafiqResponse, RafiqStep } from '../types';
 import { parseMessage, type Parsed } from './parse';
 
@@ -89,7 +89,7 @@ function afford(p: Parsed, data: DataSet, today: ISODate): RafiqResponse {
   }
   const x = p.amount;
   const after = round(sts.safe - x);
-  const afterPerDay = after > 0 ? round(after / days) : 0;
+  const afterPerDay = allowance(after, days);
   const overdue = sts.commitments.filter((o) => o.overdue);
   const topDebt = orderDebts(data.debts.filter((d) => !d.closedAt && d.balance > 0), 'avalanche')[0];
   const constraints: string[] = [
@@ -216,7 +216,7 @@ function lowcash(p: Parsed, data: DataSet, today: ISODate): RafiqResponse {
     steps.push({ title: 'Do not use a credit card or new loan to fill the gap unless a bill would otherwise go unpaid' });
     impact.push(`Paying essentials only leaves ${m(round(cash - essentialTotal))} for ${days} days.`);
   } else {
-    const perDay = round(Math.floor((free / days) * 1000) / 1000);
+    const perDay = allowance(free, days);
     const tight = sts.recentDaily > 0 && perDay < sts.recentDaily;
     verdict = tight ? 'caution' : 'yes';
     headline = `You can spend ${m(perDay)} a day for ${days} days`;
@@ -238,7 +238,7 @@ function lowcash(p: Parsed, data: DataSet, today: ISODate): RafiqResponse {
     recommendation,
     steps,
     impact,
-    followUp: { question: free < 0 ? 'Did you contact providers and protect the essential bills?' : `Did you stay under ${m(Math.max(0, round(free / days)))} a day?`, inDays: Math.min(3, days) },
+    followUp: { question: free < 0 ? 'Did you contact providers and protect the essential bills?' : `Did you stay under ${m(allowance(free, days))} a day?`, inDays: Math.min(3, days) },
   };
 }
 
@@ -269,7 +269,7 @@ function overspent(_p: Parsed, data: DataSet, today: ISODate): RafiqResponse {
   const subs = data.recurring.filter((r) => r.active && r.kind === 'expense' && !r.essential);
   if (subs.length) steps.push({ title: `Cancel or pause one optional regular cost`, detail: subs.map((s) => `${s.name} ${m(s.amount)}`).join(', ') });
   if (sts.safe < 0 && sts.savingsReserve > 0) steps.push({ title: 'Reduce this period’s savings to cover the gap', amount: Math.min(sts.savingsReserve, -sts.safe) });
-  const perDay = sts.safe > 0 ? round(sts.safe / Math.max(1, sts.payday.daysLeft)) : 0;
+  const perDay = allowance(sts.safe, Math.max(1, sts.payday.daysLeft));
   steps.push({ title: `New daily cap: ${m(perDay)} until payday` });
   return {
     verdict: sts.safe < 0 ? 'no' : 'caution',
@@ -418,7 +418,7 @@ function unexpected(p: Parsed, data: DataSet, today: ISODate): RafiqResponse {
   }
   steps.unshift({ title: 'Record the expense in Rafiq once paid', amount: x });
   const newSafe = round(sts.safe - x + (sts.savingsReserve > 0 ? Math.min(sts.savingsReserve, Math.max(0, x - Math.max(0, sts.safe))) : 0));
-  const perDay = newSafe > 0 ? round(newSafe / Math.max(1, sts.payday.daysLeft)) : 0;
+  const perDay = allowance(newSafe, Math.max(1, sts.payday.daysLeft));
   steps.push({ title: `New daily limit until payday: ${m(perDay)}` });
   return {
     verdict: gap > 0 ? 'no' : sts.safe >= x ? 'yes' : 'caution',

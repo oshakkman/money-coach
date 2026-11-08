@@ -24,7 +24,8 @@ describe('money', () => {
   it('formats JOD readably', () => {
     expect(formatMoney(30, 'JOD')).toBe('30 JOD');
     expect(formatMoney(12.5, 'JOD')).toBe('12.50 JOD');
-    expect(formatMoney(-3.125, 'JOD')).toBe('−3.125 JOD');
+    expect(formatMoney(-3.125, 'JOD')).toBe('−3.13 JOD');
+    expect(formatMoney(801.567, 'JOD')).toBe('801.57 JOD');
   });
   it('parses typed amounts', () => {
     expect(parseAmount('1,250.5 JOD')).toBe(1250.5);
@@ -91,7 +92,7 @@ describe('safe to spend', () => {
     expect(s.commitmentsTotal).toBe(110);
     expect(s.savingsReserve).toBe(50);
     expect(s.safe).toBe(144.5);
-    expect(s.perDay).toBe(16.055); // 144.5 / 9 rounded down to fils
+    expect(s.perDay).toBe(16.05); // 144.5 / 9 = 16.0555… rounded DOWN
   });
   it('reports a shortfall', () => {
     const d = scenario();

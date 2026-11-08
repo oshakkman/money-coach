@@ -19,22 +19,28 @@ export const sub = (a: number, b: number): number => fromMinor(toMinor(a) - toMi
 const DECIMALS: Record<string, number> = { JOD: 3, KWD: 3, BHD: 3, OMR: 3, TND: 3, JPY: 0 };
 export const currencyDecimals = (currency: string): number => DECIMALS[currency] ?? 2;
 
+/**
+ * Display format. Calculations keep exact fils (3 decimals); display shows at
+ * most 2 decimals and drops ".00" for whole amounts: 30 JOD, 12.50 JOD, 801.57 JOD.
+ */
 export function formatMoney(amount: number, currency: string, opts: { compact?: boolean; sign?: boolean } = {}): string {
-  const decimals = currencyDecimals(currency);
-  const abs = Math.abs(amount);
-  // Hide trailing zero fils for readability: 30.000 JOD -> 30 JOD, 12.500 -> 12.50
-  let minDigits = decimals;
-  if (decimals === 3) minDigits = Number.isInteger(round(abs)) ? 0 : 2;
+  const decimals = Math.min(2, currencyDecimals(currency));
+  const abs = Math.abs(round(amount));
+  const shown = Math.round(abs * 10 ** decimals) / 10 ** decimals;
+  const prefix = shown !== 0 && amount < 0 ? '−' : opts.sign && amount > 0 ? '+' : '';
   if (opts.compact && abs >= 10000) {
     const s = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(abs);
-    return `${amount < 0 ? '−' : opts.sign ? '+' : ''}${s} ${currency}`;
+    return `${prefix}${s} ${currency}`;
   }
-  const s = new Intl.NumberFormat('en', {
-    minimumFractionDigits: minDigits,
-    maximumFractionDigits: decimals,
-  }).format(abs);
-  const prefix = amount < 0 && toMinor(amount) !== 0 ? '−' : opts.sign && amount > 0 ? '+' : '';
+  const minDigits = Number.isInteger(shown) ? 0 : decimals;
+  const s = new Intl.NumberFormat('en', { minimumFractionDigits: minDigits, maximumFractionDigits: decimals }).format(shown);
   return `${prefix}${s} ${currency}`;
+}
+
+/** Daily/weekly allowance: rounded DOWN to 0.01 so it never overstates what is safe. */
+export function allowance(total: number, days: number): number {
+  if (total <= 0 || days <= 0) return 0;
+  return Math.floor((total / days) * 100 + 1e-9) / 100;
 }
 
 /** Parse user-typed amounts like "1,250.5" or "30 JOD". Returns NaN when invalid. */
